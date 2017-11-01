@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "419131526444",
+    "firebase_url": "https://nooran-c9401.firebaseio.com",
+    "project_id": "nooran-c9401",
+    "storage_bucket": "nooran-c9401.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419131526444:android:226299ac8fd4a0a4",
+        "android_client_info": {
+          "package_name": "isp.com.nooranv1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "419131526444-e2s7a7t2g71b1nm0hkqhgp0815huh00n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "isp.com.nooranv1",
+            "certificate_hash": "b1906c9e0efc324ee1573444016a4e63daf254ab"
+          }
+        },
+        {
+          "client_id": "419131526444-28j1o603fa5qk577tfd8p41dpdvnks5g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_FMaEIm9hS9X234MSq7z4BRYbCZ2eG7A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "419131526444-28j1o603fa5qk577tfd8p41dpdvnks5g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
