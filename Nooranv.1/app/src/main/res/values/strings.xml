@@ -9,4 +9,11 @@
     <string name="perfil">perfil</string>
     <string name="home">Home</string>
     <string name="favoritos">Favoritos</string>
+    <string name="login">Ingresar</string>
+    <string name="registro">Registrarse</string>
+    <string name="password">Contraseña</string>
+    <string name="email">Correo</string>
+    <string name="nombre">Nombre</string>
+    <string name="sinCuenta">No tienes cuenta aún? Create una</string>
+
 </resources>
