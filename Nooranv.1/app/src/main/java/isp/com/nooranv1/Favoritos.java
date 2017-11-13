@@ -81,7 +81,7 @@ public class Favoritos extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Notificacion Favoritos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Notificacion Favoritos llegue", Toast.LENGTH_SHORT).show();
         }
     }
 

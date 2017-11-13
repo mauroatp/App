@@ -2,9 +2,11 @@ package isp.com.nooranv1;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -24,30 +26,43 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static android.provider.BaseColumns._ID;
+import static isp.com.nooranv1.Constantes.EMAIL_USUARIO;
+import static isp.com.nooranv1.Constantes.FOTO_USUARIO;
+import static isp.com.nooranv1.Constantes.NOMBRE_TABLA_USUARIO;
+import static isp.com.nooranv1.Constantes.NOMBRE_USUARIO;
+
 /**
  * Created by Mauro on 4/11/2017.
  */
 
-public class LoginActivity extends ActionBarActivity implements View.OnClickListener{
+public class LoginActivity extends ActionBarActivity implements View.OnClickListener {
 
     private EditText email;
     private EditText password;
     private SharedPreferences usu;
     private boolean conect;
+    public Usuario usuario;
+    private static String[] FROM = {_ID, NOMBRE_USUARIO, EMAIL_USUARIO, FOTO_USUARIO};
+    private static String ORDER_BY = NOMBRE_USUARIO + " DESC";
+    private BaseDatosUsuario events;
+    //private static int[] TO = {R.id.itemNombre, R.id.itemDescripcion, R.id.itemPrecio};
+    String verDB ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+        events = new BaseDatosUsuario(this);
 
-        usu = getApplicationContext().getSharedPreferences("usuario", Context.MODE_PRIVATE);
+        usu = getApplicationContext().getSharedPreferences("usuario", Context.MODE_ENABLE_WRITE_AHEAD_LOGGING);
 
         String login = usu.getString("usuario", "");
 
         if (!login.equals("")) {
             Intent e = new Intent(this, MainActivity.class);
             startActivity(e);
-        } else{
+        } else {
 
             email = (EditText) findViewById(R.id.txtEmailLogin);
             password = (EditText) findViewById(R.id.txtPasswordLogin);
@@ -70,7 +85,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
 
-        if(conectado()) {
+        if (conectado()) {
             switch (v.getId()) {
                 case R.id.btn_registro:
                     Intent i = new Intent(this, RegistroActivity.class);
@@ -80,7 +95,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     ingresar();
                     break;
             }
-        }else{
+        } else {
             Toast.makeText(getApplicationContext(), "Error, no hay conexion", Toast.LENGTH_SHORT).show();
         }
     }
@@ -89,15 +104,15 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         String n = this.getEmail();
         String a = this.getPassword();
 
-        if(conectado()) {
+        if (conectado()) {
             if (!n.equals("") || !a.equals("")) {
                 //new GetDataTask(this).execute("http://10.0.2.2/user/login/"+n);
-                new GetDataTask(this).execute("http://172.29.1.17/user/login/getall");
+                new GetDataTask(this).execute("http://192.168.0.107:3000/user/login/" + n);
             } else {
                 Toast.makeText(getApplicationContext(), "email/password requeridos",
                         Toast.LENGTH_SHORT).show();
             }
-        }else{
+        } else {
             Toast.makeText(getApplicationContext(), "Error no hay conexion",
                     Toast.LENGTH_SHORT).show();
         }
@@ -121,45 +136,75 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                 String valor = reader.readLine();
                 reader.close();
                 con.disconnect();
-                JSONObject respuesta = new JSONObject(valor);
-                JSONArray desc = respuesta.getJSONArray("description");
-                int arraysize = desc.length();
+
+                JSONArray desc = new JSONArray(valor);
+                //JSONObject respuesta = new JSONObject(valor);
+
+                //JSONArray desc = respuesta.getJSONArray("id");
+
                 String email = null;
                 String password = null;
-                String em = null;
-                String pass = null;
-                for (int i = 0; i < arraysize; i++) {
+                String nombre = null;
+                String foto = null;
 
-                    email = desc.getJSONObject(i).getString("email");
-                    password = desc.getJSONObject(i).getString("clave");
-                    em = this.m_activity.getEmail();
-                    pass = this.m_activity.getPassword();
+                if (desc != null && desc.length() > 0) {
+                    email = desc.getJSONObject(0).getString("mail");
+                    password = desc.getJSONObject(0).getString("clave");
+                    nombre = desc.getJSONObject(0).getString("nombre");
+                    String p = this.m_activity.getPassword();
 
-                    if (email.equals(this.m_activity.getEmail()) && password.equals(this.m_activity.getPassword())) {
+                    AESCrypt s = new AESCrypt();
+                    p = s.encryptIt(p);
 
-                        SharedPreferences.Editor editor = usu.edit();
-                        editor.putString("usuario", email);
-                        editor.commit();
-                        String a = usu.getString("usuario", "");
-                        return email;
+                    if (p.equals(password)) {
+                        if (email != null && email != "") {
+                            SharedPreferences.Editor editor = usu.edit();
+                            editor.putString("usuario", email);
+                            editor.putString("nombre", nombre);
+                            editor.commit();
+                            String a = usu.getString("usuario", "");
+                            usuario = new Usuario(nombre, email, "", password);
 
+                            agregarUsuario(usuario);
+                        } else {
+                            email = null;
+                        }
+                    } else {
+                        email = "no";
                     }
                 }
-                return null;
+                return email;
             } catch (Exception ex) {
                 Log.e("Error", ex.getMessage());
-
                 return null;
             }
         }
 
+        private void agregarUsuario(Usuario U) {
+            SQLiteDatabase db = events.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put(NOMBRE_USUARIO, U.getNombre());
+            values.put(FOTO_USUARIO, U.getFoto());
+            values.put(EMAIL_USUARIO, U.getEmail());
+
+
+            db.insertOrThrow(NOMBRE_TABLA_USUARIO, null, values);
+        }
+
         protected void onPostExecute(String result) {
-            if (result != null) {
+            if (result != null && result != "no") {
                 if (m_activity != null) {
                     //SharedPreferences prefe=getSharedPreferences(result, 0);
                     Intent e = new Intent(this.m_activity, MainActivity.class);
+                    /*e.putExtra("Nombre", usuario.getNombre());
+                    e.putExtra("Email", usuario.getEmail());
+                    e.putExtra("Password", usuario.getPassword());
+                    e.putExtra("Foto", usuario.getFoto());*/
                     startActivity(e);
                 }
+            } else if (result == "no") {
+                Toast.makeText(getApplicationContext(), "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getApplicationContext(), "Usuario no registrado", Toast.LENGTH_SHORT).show();
             }
@@ -179,8 +224,6 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
 
         return connected;
     }
-
-
 
 }
 

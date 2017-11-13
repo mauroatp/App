@@ -40,7 +40,7 @@
                 android:backgroundTint="@color/colorBlanco"
                 app:hintTextAppearance="@color/colorBlanco"
                 android:textColor="@color/colorBlanco"
-                android:hint="Email" />
+                android:hint="@string/email" />
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Label -->
@@ -57,7 +57,7 @@
                 android:inputType="textPassword"
                 android:backgroundTint="@color/colorBlanco"
                 android:textColor="@color/colorBlanco"
-                android:hint="Password"/>
+                android:hint="@string/password"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton

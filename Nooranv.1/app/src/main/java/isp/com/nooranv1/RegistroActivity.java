@@ -20,11 +20,19 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.security.SecureRandom;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 /**
  * Created by Mauro on 4/11/2017.
  */
 
 public class RegistroActivity extends Activity implements View.OnClickListener {
+
+    public Usuario usuario;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +56,10 @@ public class RegistroActivity extends Activity implements View.OnClickListener {
         EditText eT4 = (EditText)findViewById(R.id.passwordRegistro);
         String sPassword = eT4.getText().toString();
 
+        AESCrypt s = new AESCrypt();
+        sPassword = s.encryptIt(sPassword);
+        //sPassword = encryption(sPassword);
+
         Map<String, String> postData = new HashMap<>();
         postData.put("nombre", sNombre);
         postData.put("mail", sEmail);
@@ -55,10 +67,21 @@ public class RegistroActivity extends Activity implements View.OnClickListener {
 
 
         HttpPostAsyncTask task = new HttpPostAsyncTask(postData);
-        task.execute("10.0.2.2/user/create");
+        task.execute("http://192.168.0.107:3000/user/create");
 
     }
-
+/*
+    public String encryption(String strNormalText){
+        String seedValue = "YourSecKey";
+        String normalTextEnc="";
+        try {
+            normalTextEnc = Encriptar.encrypt(seedValue, strNormalText);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return normalTextEnc;
+    }
+*/
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -115,7 +138,7 @@ public class RegistroActivity extends Activity implements View.OnClickListener {
                     InputStream inputStream = new BufferedInputStream(urlConnection.getErrorStream());
                     String response = convertInputStreamToString(inputStream);
                     Log.e("Error",response);
-                    if(statusCode == 409) {
+                    if(statusCode == 400) {
                         return  "409";
                     }
                     return null;
@@ -133,9 +156,16 @@ public class RegistroActivity extends Activity implements View.OnClickListener {
 
             if (result != null && result != "409") {
                 Intent e = new Intent(RegistroActivity.this, MainActivity.class);
+
+                e.putExtra("Nombre", usuario.getNombre());
+                e.putExtra("Email", usuario.getEmail());
+                e.putExtra("Password", usuario.getPassword());
+                e.putExtra("Foto", usuario.getFoto());
+
                 startActivity(e);
                 Toast.makeText(getApplicationContext(), "Ok",
                         Toast.LENGTH_SHORT).show();
+
             }
             else if(result.equals("409"))
             {

@@ -1,4 +1,4 @@
 # App
 
-creo el repositorio Mauro
-1/11/2017 20:44 
+fragment y bd usuario Mauro
+13/11/2017 20:44 
